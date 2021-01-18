@@ -1,11 +1,34 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <title>Gas+SQL</title>
+  <style>
+    textarea {
+      width: 80vw;
+      height: 20vh;
+    }
+  </style>
 </head>
+
 <body>
-    
+  <label for="SQL"><b>SQL</b></label><br>
+  <textarea id="SQL"></textarea><br>
+  <button type="button" id="bt">実行</button><br>
 </body>
+<script>
+  document.getElementById("bt").onclick = sql_run;
+
+  function sql_run() {
+    let value = document.getElementById("SQL").value;
+  
+    google.script.run
+    .withFailureHandler(onFailure)
+    .sql_run_gs(value);
+  }
+
+  function onFailure(e) {
+    alert([e.message, e.stack]);
+  }
+</script>
 </html>
+
