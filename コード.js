@@ -8,82 +8,68 @@ const stmt     = conn.createStatement();
 const sheet = SpreadsheetApp.getActiveSheet();
 const sheet_setRange = sheet.getRange(1, 1, sheet.getLastRow() + 1, sheet.getLastColumn() + 1)
 
-
 function onOpen() {
   SpreadsheetApp.getUi().createMenu("Google Cloud SQL").addItem("SQL実行", "openSidebar").addToUi();
 }
 
-
 function openSidebar() {
-  let html = HtmlService.createHtmlOutputFromFile("index").setTitle("Apps Scipt アプリケーション");
+  const html = HtmlService.createHtmlOutputFromFile("index").setTitle("Apps Scipt アプリケーション");
   SpreadsheetApp.getUi().showSidebar(html);
 }
 
-
-function sql_run_gs(value) {
-  let students_data = [];
-  let strSQL = value;
-  let select_id;
-  
-    try {
-      // select処理
-      if ( strSQL.match(/select/) ) {
-        students_data = stmt.executeQuery(strSQL);
-        ss_write(students_data);
-        
-      // update処理
-      } else if ( strSQL.match(/update/) ) {
-        stmt.execute(strSQL);
-        
-        select_id = value.split("=")[2];
-        let strSQL_update = 'SELECT * FROM students where id = ' + select_id ;
-        students_data = stmt.executeQuery(strSQL_update);
-        ss_write(students_data);
-        
-      // insert処理
-      } else if  ( strSQL.match(/insert/) ) {
-        stmt.execute(strSQL);
-        
-        // select_id取得        
-        let tmp1  = value.match(/\(.*\)/);
-        let tmp2  = tmp1[0].split(",");
-        select_id = tmp2[0]
-        select_id = select_id.slice(1);
-        let strSQL_insert = 'SELECT * FROM students where id = ' + select_id ;
-        students_data = stmt.executeQuery(strSQL_insert);
-        ss_write(students_data);
-              
-      // delete処理
-      } else {
-        // delete処理前のselect発行とスプレッドシート出力
-        select_id = value.split("=")[1];
-        let strSQL_delete = 'SELECT * FROM students where id = ' + select_id ;
-        students_data = stmt.executeQuery(strSQL_delete);
-        ss_write(students_data);
-        
-        stmt.execute(strSQL);
-      }
+function sqlRunGas(value) {
+  let studentsData = [];
+  let selectID; 
+  try {
+    if ( value.match(/select/) ) {
+      studentsData = stmt.executeQuery(value);
+      // スプレッドシート出力
+      ssWrite(studentsData);
+    } 
+    if ( value.match(/update/) ) {
+      stmt.execute(value);
+      selectID = value.split("=")[2];
+      let sqlSelect = 'SELECT * FROM students where id = ' + selectID ;
+      studentsData = stmt.executeQuery(sqlSelect);
+      // スプレッドシート出力
+      ssWrite(studentsData);  
+    }
+    if ( value.match(/insert/) ) {
+      stmt.execute(value);
+      // selectID取得
+      let tmp1  = value.match(/\(.*\)/);
+      let tmp2  = tmp1[0].split(",");
+      selectID = tmp2[0]
+      selectID = selectID.slice(1);
+      let sqlSelect = 'SELECT * FROM students where id = ' + selectID ;
+      studentsData = stmt.executeQuery(sqlSelect);
+      // スプレッドシート出力
+      ssWrite(studentsData);
+    }
+    if ( value.match(/delete/) ) {
+      // delete処理前のselect発行とスプレッドシート出力
+      selectID = value.split("=")[1];
+      let sqlSelect = 'SELECT * FROM students where id = ' + selectID ;
+      studentsData = stmt.executeQuery(sqlSelect);
+      ssWrite(studentsData);
+      stmt.execute(value);
+    }
     } catch (e) {
-      Logger.log(e);
-      console.log(e);
       throw new Error('SQL実行エラー発生');
     } finally {
       if (conn !== undefined) conn.close();
     }
 }
 
-
-function ss_write(students_data) {
+function ssWrite(studentsData) {
   sheet_setRange.clearContent();
-  
-  let numCols = students_data.getMetaData().getColumnCount();
-  while (students_data.next()) {
-    let arr = [];
+  const numCols = studentsData.getMetaData().getColumnCount();
+  while (studentsData.next()) {
+    const arr = [];
     for (let i = 0; i < numCols; i++) {
-      arr.push(students_data.getString(i + 1));
+      arr.push(studentsData.getString(i + 1));
     }
     sheet.appendRow(arr);
   }
-  students_data.close();
+  studentsData.close();
 }
-

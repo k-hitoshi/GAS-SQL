@@ -16,19 +16,19 @@
   <button type="button" id="bt">実行</button><br>
 </body>
 <script>
-  document.getElementById("bt").onclick = sql_run;
+  document.getElementById("bt").onclick = sqlRun;
 
-  function sql_run() {
-    let value = document.getElementById("SQL").value;
+  function sqlRun() {
+  let value = document.getElementById("SQL").value;
   
     google.script.run
     .withFailureHandler(onFailure)
-    .sql_run_gs(value);
+    .sqlRunGas(value);
   }
 
   function onFailure(e) {
     alert([e.message, e.stack]);
   }
+  
 </script>
 </html>
-
