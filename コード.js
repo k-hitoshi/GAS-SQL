@@ -1,7 +1,7 @@
 // SQL_Statement
-const url      = 'jdbc:mysql://35.188.25.67:3306/h_kusi';
-const userName = 'root';
-const password = 'root';
+const url      = PropertiesService.getScriptProperties().getProperty('urlInfo');
+const userName = PropertiesService.getScriptProperties().getProperty('userNameInfo');
+const password = PropertiesService.getScriptProperties().getProperty('passwordInfo');
 const conn     = Jdbc.getConnection(url, userName, password);
 const stmt     = conn.createStatement();
 // SS_info
@@ -18,6 +18,7 @@ function openSidebar() {
 }
 
 function sqlRunGas(value) {
+  Logger.log(url);
   let studentsData = [];
   let selectID; 
   try {
@@ -54,11 +55,11 @@ function sqlRunGas(value) {
       ssWrite(studentsData);
       stmt.execute(value);
     }
-    } catch (e) {
-      throw new Error('SQL実行エラー発生');
-    } finally {
-      if (conn !== undefined) conn.close();
-    }
+  } catch (e) {
+    throw new Error('SQL実行エラー発生');
+  } finally {
+    if (conn !== undefined) conn.close();
+  }
 }
 
 function ssWrite(studentsData) {
